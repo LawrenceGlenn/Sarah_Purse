@@ -9,6 +9,17 @@
 
 #define BRIGHTNESS 50
 
+int colorInputPin = A0;
+int tinyInputPin = A1;
+int colorInputValue = 0;
+int redValue = 0;
+int greenValue = 0;
+int blueValue = 0;
+int whiteValue = 0;
+int inputMax = 1024;
+int brightnessValue = 0;
+
+
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_LEDS, PIN, NEO_GRBW + NEO_KHZ800);
 
 byte neopix_gamma[] = {
@@ -31,17 +42,24 @@ byte neopix_gamma[] = {
 
 
 void setup() {
-  // This is for Trinket 5V 16MHz, you can remove these three lines if you are not using a Trinket
-  #if defined (__AVR_ATtiny85__)
-    if (F_CPU == 16000000) clock_prescale_set(clock_div_1);
-  #endif
-  // End of trinket special code
   strip.setBrightness(BRIGHTNESS);
   strip.begin();
   strip.show(); // Initialize all pixels to 'off'
+  pinMode(colorInputPin, INPUT);
+  pinMode(tintInputPin, INPUT);
 }
 
 void loop() {
+  // read the value from the input:
+  sensorValue = analogRead(sensorPin);
+  // turn the ledPin on
+  digitalWrite(ledPin, HIGH);
+  // stop the program for <sensorValue> milliseconds:
+  delay(sensorValue);
+  // turn the ledPin off:
+  digitalWrite(ledPin, LOW);
+  // stop the program for for <sensorValue> milliseconds:
+  delay(sensorValue);
   // Some example procedures showing how to display to the pixels:
   colorWipe(strip.Color(255, 0, 0), 50); // Red
   colorWipe(strip.Color(0, 255, 0), 50); // Green
@@ -58,6 +76,65 @@ void loop() {
   rainbowFade2White(3,3,1);
 
 
+}
+
+//take input from color wheel and set color values
+void setColorWheelInput(){
+  colorInputValue = analogRead(colorInputPin);
+
+ // start at full red
+ // increase green    0     - 255
+ // decrease red      256   - 511
+ // increase blue     512   -767
+ // decrease green    768   - 1023
+ // increase red      1024  - 1279
+ // decrease blue     1280  - 1535
+  x = map(colorInputValue, 0, inputMax, 0, 1535);
+  if (x<=255) {
+    redValue = 255;
+    greenValue = x;
+    blueValue = 0;
+  }else if (x>=256 && x<=511){
+    redValue = 511-x;
+    greenValue = 255;
+    blueValue = 0;
+  }else if (x>=512 && x<=767){
+    redValue = 0;
+    greenValue = 255;
+    blueValue = x-512;
+  }else if (x>=768 && x<=1023){
+    redValue = 0;
+    greenValue = 1023-x;
+    blueValue = 255;
+  }else if (x>=1024 && x<=1279){
+    redValue = x-1024;
+    greenValue = 0;
+    blueValue = 255;
+  }else if (x>=1280 && x<=1536){
+    redValue = 255;
+    greenValue = 0;
+    blueValue = 1536-x;
+  }
+  
+}
+
+//take input from tiny wheel and set brightness and white values
+void setTintWheelInput(){
+  colorTintValue = analogRead(colorTintPin);
+
+ // start at brightness and white off
+ // increase brightness                         0     - 255
+ // decrease brightness and increase white      256   - 511
+
+  x = map(tintInputValue, 0, inputMax, 0, 511);
+  if (x<=255) {
+    brightnessValue = x;
+    whiteValue = 0;
+  }else if (x>=256 && x<=511){
+    brightnessValue = 511-x;
+    whiteValue = x-256;
+  }
+  
 }
 
 // Fill the dots one after the other with a color
