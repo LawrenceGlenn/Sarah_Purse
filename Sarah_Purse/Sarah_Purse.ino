@@ -11,7 +11,9 @@
 
 int colorInputPin = A0;
 int tinyInputPin = A1;
+int brightnessInputPin = A2;
 int colorInputValue = 0;
+int brightnessInputValue = 0;
 int redValue = 0;
 int greenValue = 0;
 int blueValue = 0;
@@ -47,17 +49,20 @@ void setup() {
   strip.show(); // Initialize all pixels to 'off'
   pinMode(colorInputPin, INPUT);
   pinMode(tintInputPin, INPUT);
+  pinMode(brightnessInputPin, INPUT);
 }
 
 void loop() {
   // read the value from the input:
   setColorWheelInput();
   setTintWheelInput();
+  setBrightnessWheelInput();
 
   //loop through the pixels and set thier values
       for(uint16_t i=0; i<strip.numPixels(); i++) {
           strip.setPixelColor(i, strip.Color(redValue,greenValue,blueValue,whiteValue)) );
         }
+        strip.setBrightness(brightnessValue);
         strip.show();
       }
         delay(wait);
@@ -107,24 +112,21 @@ void setColorWheelInput(){
 
 //take input from tiny wheel and set brightness and white values
 void setTintWheelInput(){
-  colorTintValue = analogRead(colorTintPin);
+  tintInputValue = analogRead(tintInputPin);
 
  // start at brightness and white off
  // increase brightness                         0     - 255
  // decrease brightness and increase white      256   - 511
 
   x = map(tintInputValue, 0, inputMax, 0, 511);
-  if (x<=255) {
-    brightnessValue = x;
-    whiteValue = 0;
-  }else if (x>=256 && x<=511){
-    brightnessValue = 511-x;
-    whiteValue = x-256;
-  }
-  redValue = redValue*(neopix_gamma[brightnessValue]/255);
-  greenValue = greenValue*(neopix_gamma[brightnessValue]/255);
-  blueValue = blueValue*(neopix_gamma[brightnessValue]/255);
+  whiteValue = x;
   
+}
+
+void setBrightnessWheelInput(){
+  brightnessInputValue = analogRead(brightnessInputPin);
+  x = map(brightnessInputValue, 0, inputMax, 0, 255);
+  brightnessValue = neopix_gamma[x];
 }
 
 
