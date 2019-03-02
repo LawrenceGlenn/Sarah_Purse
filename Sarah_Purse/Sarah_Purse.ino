@@ -7,7 +7,7 @@
 
 #define NUM_LEDS 60
 
-#define BRIGHTNESS 50
+#define BRIGHTNESS 200
 
 int colorInputPin = A0;
 int tinyInputPin = A1;
@@ -51,29 +51,16 @@ void setup() {
 
 void loop() {
   // read the value from the input:
-  sensorValue = analogRead(sensorPin);
-  // turn the ledPin on
-  digitalWrite(ledPin, HIGH);
-  // stop the program for <sensorValue> milliseconds:
-  delay(sensorValue);
-  // turn the ledPin off:
-  digitalWrite(ledPin, LOW);
-  // stop the program for for <sensorValue> milliseconds:
-  delay(sensorValue);
-  // Some example procedures showing how to display to the pixels:
-  colorWipe(strip.Color(255, 0, 0), 50); // Red
-  colorWipe(strip.Color(0, 255, 0), 50); // Green
-  colorWipe(strip.Color(0, 0, 255), 50); // Blue
-  colorWipe(strip.Color(0, 0, 0, 255), 50); // White
+  setColorWheelInput();
+  setTintWheelInput();
 
-  whiteOverRainbow(20,75,5);  
-
-  pulseWhite(5); 
-
-  // fullWhite();
-  // delay(2000);
-
-  rainbowFade2White(3,3,1);
+  //loop through the pixels and set thier values
+      for(uint16_t i=0; i<strip.numPixels(); i++) {
+          strip.setPixelColor(i, strip.Color(redValue,greenValue,blueValue,whiteValue)) );
+        }
+        strip.show();
+      }
+        delay(wait);
 
 
 }
@@ -134,6 +121,9 @@ void setTintWheelInput(){
     brightnessValue = 511-x;
     whiteValue = x-256;
   }
+  redValue = redValue*(brightnessValue/255);
+  greenValue = greenValue*(brightnessValue/255);
+  blueValue = blueValue*(brightnessValue/255);
   
 }
 
