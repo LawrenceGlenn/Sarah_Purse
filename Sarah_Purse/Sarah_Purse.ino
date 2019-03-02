@@ -121,9 +121,9 @@ void setTintWheelInput(){
     brightnessValue = 511-x;
     whiteValue = x-256;
   }
-  redValue = redValue*(brightnessValue/255);
-  greenValue = greenValue*(brightnessValue/255);
-  blueValue = blueValue*(brightnessValue/255);
+  redValue = redValue*(neopix_gamma[brightnessValue]/255);
+  greenValue = greenValue*(neopix_gamma[brightnessValue]/255);
+  blueValue = blueValue*(neopix_gamma[brightnessValue]/255);
   
 }
 
