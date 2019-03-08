@@ -25,6 +25,12 @@ int wait = 10;
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_LEDS, PIN, NEO_GRBW + NEO_KHZ800);
 
+
+int colorMatrix[NUM_LEDS][4];
+float currentColorMatrix[NUM_LEDS][5];
+float endColorMatrix[NUM_LEDS][5];
+
+
 byte neopix_gamma[] = {
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,
