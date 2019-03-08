@@ -136,6 +136,40 @@ void setBrightnessWheelInput(){
 }
 
 
+void shimmer(){
+
+  for(int k=0; k<1;k++){
+    if(currentColorMatrix[k][4] == 0){
+      Serial.println("current");
+      Serial.println(currentColorMatrix[k][4]);
+      Serial.println("end time");
+      Serial.println(endColorMatrix[k][4]);
+      Serial.println("now");
+      Serial.println(millis());
+      currentColorMatrix[k][4] = millis();
+      Serial.println("TEST1");
+      Serial.println(currentColorMatrix[k][4]);
+      endColorMatrix[k][4] = currentColorMatrix[k][4]+5000;
+      endColorMatrix[k][0] = 255;
+      endColorMatrix[k][1] = 0;
+      Serial.println("TEST1");
+      Serial.println(currentColorMatrix[k][4]);
+      endColorMatrix[k][2] = 0;
+      endColorMatrix[k][3] = 0;
+    }
+      Serial.println("TEST2");
+      Serial.println(currentColorMatrix[k][4]);
+    currentColorMatrix[k][0] = map(millis(), currentColorMatrix[k][4], endColorMatrix[k][4], currentColorMatrix[k][0], endColorMatrix[k][0]);
+    currentColorMatrix[k][1] = map(millis(), currentColorMatrix[k][4], endColorMatrix[k][4], currentColorMatrix[k][1], endColorMatrix[k][1]);
+    currentColorMatrix[k][2] = map(millis(), currentColorMatrix[k][4], endColorMatrix[k][4], currentColorMatrix[k][2], endColorMatrix[k][2]);
+    currentColorMatrix[k][3] = map(millis(), currentColorMatrix[k][4], endColorMatrix[k][4], currentColorMatrix[k][3], endColorMatrix[k][3]);
+  
+      Serial.println("TEST3");
+      Serial.println(currentColorMatrix[k][4]);
+      }
+
+  
+}
 // Input a value 0 to 255 to get a color value.
 // The colours are a transition r - g - b - back to r.
 uint32_t Wheel(byte WheelPos) {
