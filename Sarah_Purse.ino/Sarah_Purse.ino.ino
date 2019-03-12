@@ -118,13 +118,23 @@ void setBrightnessWheelInput(){
   brightnessValue = map(brightnessInputValue, 0, inputMax, 0, 255);
 }
 
+int randomColorValue(startValue, decrease, increase){
+  int temp = startValue-decrease+random(decrease+increase);
+  if(temp < 0){
+    temp = 0;
+  }else if(temp>255){
+    temp = 255;
+  }
+  return temp;
+}
+
 
 void shimmer(){
   for(int k=0; k<strip.numPixels();k++){
     if(millis()>endMillis[k]){
       for(int j=0; j<4;j++){
         startColorMatrix[k][j] = endColorMatrix[k][j];
-        endColorMatrix[k][j] = colorValue[j]-20+random(40);
+        endColorMatrix[k][j] = randomcColorValue(colorValue[j],20,20);
       }
       startMillis[k] = millis();
       endMillis[k] = startMillis[k]+5000;
@@ -134,6 +144,14 @@ void shimmer(){
       if(currentColorMatrix[j] != endColorMatrix[k][j]){
         currentColorMatrix[j] = map(millis(), startMillis[k], endMillis[k], startColorMatrix[k][j], endColorMatrix[k][j]);
       }
+      Serial.println("red");
+      Serial.print(currentColorMatrix[0]);
+      Serial.println("green");
+      Serial.print(currentColorMatrix[1]);
+      Serial.println("blue");
+      Serial.print(currentColorMatrix[2]);
+      Serial.println("white");
+      Serial.print(currentColorMatrix[3]);
         strip.setPixelColor(k, strip.Color(currentColorMatrix[0],currentColorMatrix[1],currentColorMatrix[2],currentColorMatrix[3]));
     }
   }
