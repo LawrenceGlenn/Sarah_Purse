@@ -118,23 +118,13 @@ void setBrightnessWheelInput(){
   brightnessValue = map(brightnessInputValue, 0, inputMax, 0, 255);
 }
 
-int randomColorValue(startValue, decrease, increase){
-  int temp = startValue-decrease+random(decrease+increase);
-  if(temp < 0){
-    temp = 0;
-  }else if(temp>255){
-    temp = 255;
-  }
-  return temp;
-}
-
 
 void shimmer(){
   for(int k=0; k<strip.numPixels();k++){
     if(millis()>endMillis[k]){
       for(int j=0; j<4;j++){
         startColorMatrix[k][j] = endColorMatrix[k][j];
-        endColorMatrix[k][j] = randomcColorValue(colorValue[j],20,20);
+        endColorMatrix[k][j] = randomColorValue(colorValue[j],20,20);
       }
       startMillis[k] = millis();
       endMillis[k] = startMillis[k]+5000;
@@ -157,6 +147,18 @@ void shimmer(){
   }
   
 }
+
+
+int randomColorValue(int startValue, int decrease, int increase){
+  int temp = startValue-decrease+random(decrease+increase);
+  if(temp < 0){
+    temp = 0;
+  }else if(temp>255){
+    temp = 255;
+  }
+  return temp;
+}
+
 // Input a value 0 to 255 to get a color value.
 // The colours are a transition r - g - b - back to r.
 uint32_t Wheel(byte WheelPos) {
