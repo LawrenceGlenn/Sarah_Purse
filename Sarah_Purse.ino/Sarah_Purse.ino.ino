@@ -49,16 +49,17 @@ void loop() {
  // setColorWheelInput();
  // setTintWheelInput();
  // setBrightnessWheelInput();
- colorValue[0]=150;
- colorValue[2]=100;
+ colorValue[0]=0;
+ colorValue[1]=10;
+ colorValue[2]=50;
+ colorValue[3]=200;
 shimmer();
-  //loop through the pixels and set thier values
-//      for(uint16_t i=0; i<strip.numPixels(); i++) {
-//          strip.setPixelColor(i, strip.Color(redValue,greenValue,blueValue,whiteValue));
-//        }
-        strip.setBrightness(brightnessValue);
-        strip.show();
-      
+//  loop through the pixels and set thier values
+ //     for(uint16_t i=0; i<strip.numPixels(); i++) {
+ //         strip.setPixelColor(i, strip.Color(200,0,100,20));
+ //       }
+ // strip.setBrightness(200);
+ //       strip.show();
         delay(wait);
 
 
@@ -124,7 +125,7 @@ void shimmer(){
     if(millis()>endMillis[k]){
       for(int j=0; j<4;j++){
         startColorMatrix[k][j] = endColorMatrix[k][j];
-        endColorMatrix[k][j] = randomColorValue(colorValue[j],20,20);
+        endColorMatrix[k][j] = randomColorValue(colorValue[j],80,80);
       }
       startMillis[k] = millis();
       endMillis[k] = startMillis[k]+5000;
@@ -134,17 +135,12 @@ void shimmer(){
       if(currentColorMatrix[j] != endColorMatrix[k][j]){
         currentColorMatrix[j] = map(millis(), startMillis[k], endMillis[k], startColorMatrix[k][j], endColorMatrix[k][j]);
       }
-      Serial.println("red");
-      Serial.print(currentColorMatrix[0]);
-      Serial.println("green");
-      Serial.print(currentColorMatrix[1]);
-      Serial.println("blue");
-      Serial.print(currentColorMatrix[2]);
-      Serial.println("white");
-      Serial.print(currentColorMatrix[3]);
-        strip.setPixelColor(k, strip.Color(currentColorMatrix[0],currentColorMatrix[1],currentColorMatrix[2],currentColorMatrix[3]));
     }
+    strip.setPixelColor(k, strip.Color(currentColorMatrix[0],currentColorMatrix[1],currentColorMatrix[2],currentColorMatrix[3]));
   }
+  
+        strip.setBrightness(200);
+        strip.show();
   
 }
 
