@@ -167,23 +167,35 @@ void flicker(int pixel){
   
 }
 
+void updateEndColor(int pixel,int j, int decrease, int increase){
+        startColorMatrix[pixel][j] = endColorMatrix[pixel][j];
+        if(endColorMatrix[pixel][j] >= colorValue[j]){
+          endColorMatrix[pixel][j] = colorValueLimit(colorValue[j]-decrease);
+        }else{
+          endColorMatrix[pixel][j] = colorValueLimit(colorValue[j]+increase);
+        }
+  
+}
+
 void shimmer(int pixel){
   
     if(millis()>endMillis[pixel]){
       for(int j=0; j<3;j++){
-        startColorMatrix[pixel][j] = endColorMatrix[pixel][j];
-        if(endColorMatrix[pixel][j] >= colorValue[j]){
-          endColorMatrix[pixel][j] = colorValue[j]-50;
-        }else{
-          endColorMatrix[pixel][j] = colorValue[j]+50;
-        }
+        updateEndColor(pixel,j,70,70);
       }
-      startColorMatrix[pixel][3] = endColorMatrix[pixel][3];
-      if(endColorMatrix[pixel][3] >= colorValue[3]){
-          endColorMatrix[pixel][3] = colorValue[3]-30;
-        }else{
-          endColorMatrix[pixel][3] = colorValue[3]+80;
-        }
+        updateEndColor(pixel,3,40,100);
+      startMillis[pixel] = millis();
+      endMillis[pixel] = startMillis[pixel]+random(500,4000);
+    }
+}
+
+void bioGlow(int pixel){
+  
+    if(millis()>endMillis[pixel]){
+      for(int j=0; j<3;j++){
+        updateEndColor(pixel,j,50,50);
+      }
+        updateEndColor(pixel,3,30,80);
       startMillis[pixel] = millis();
       endMillis[pixel] = startMillis[pixel]+random(2000,8000);
     }
