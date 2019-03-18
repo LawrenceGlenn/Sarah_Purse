@@ -34,6 +34,25 @@ int currentColorMatrix[4];
 float startMillis[NUM_LEDS];
 float endMillis[NUM_LEDS];
 
+byte neopix_gamma[] = {
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,
+    1,  1,  1,  1,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2,  2,  2,
+    2,  3,  3,  3,  3,  3,  3,  3,  4,  4,  4,  4,  4,  5,  5,  5,
+    5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  9,  9,  9, 10,
+   10, 10, 11, 11, 11, 12, 12, 13, 13, 13, 14, 14, 15, 15, 16, 16,
+   17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 24, 24, 25,
+   25, 26, 27, 27, 28, 29, 29, 30, 31, 32, 32, 33, 34, 35, 35, 36,
+   37, 38, 39, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 50,
+   51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66, 67, 68,
+   69, 70, 72, 73, 74, 75, 77, 78, 79, 81, 82, 83, 85, 86, 87, 89,
+   90, 92, 93, 95, 96, 98, 99,101,102,104,105,107,109,110,112,114,
+  115,117,119,120,122,124,126,127,129,131,133,135,137,138,140,142,
+  144,146,148,150,152,154,156,158,160,162,164,167,169,171,173,175,
+  177,180,182,184,186,189,191,193,196,198,200,203,205,208,210,213,
+  215,218,220,223,225,228,231,233,236,239,241,244,247,249,252,255 };
+
+
 void setup() {
   strip.setBrightness(BRIGHTNESS);
   strip.begin();
@@ -42,6 +61,10 @@ void setup() {
   pinMode(colorInputPin, INPUT);
   pinMode(tintInputPin, INPUT);
   pinMode(brightnessInputPin, INPUT);
+ colorValue[0]=0;
+ colorValue[1]=10;
+ colorValue[2]=80;
+ colorValue[3]=200;
 }
 
 void loop() {
@@ -49,20 +72,34 @@ void loop() {
  // setColorWheelInput();
  // setTintWheelInput();
  // setBrightnessWheelInput();
- colorValue[0]=0;
- colorValue[1]=10;
- colorValue[2]=50;
- colorValue[3]=200;
-shimmer();
 //  loop through the pixels and set thier values
  //     for(uint16_t i=0; i<strip.numPixels(); i++) {
  //         strip.setPixelColor(i, strip.Color(200,0,100,20));
  //       }
  // strip.setBrightness(200);
  //       strip.show();
+  
+  for(int k=0; k<strip.numPixels();k++){
+    shimmer(k);
+    setCurrentColorMatrix(k);
+    strip.setPixelColor(k, strip.Color(neopix_gamma[currentColorMatrix[0]],neopix_gamma[currentColorMatrix[1]],neopix_gamma[currentColorMatrix[2]],neopix_gamma[currentColorMatrix[3]]));
+        strip.show();
+  Serial.println("current blue value");
+  Serial.println(currentColorMatrix[3]);
+  }
+        strip.setBrightness(200);
         delay(wait);
 
 
+}
+
+void setCurrentColorMatrix(int pixel){
+  
+    for(int j=0; j<4;j++){
+      if(currentColorMatrix[j] != endColorMatrix[pixel][j]){
+        currentColorMatrix[j] = colorValueLimit(map(millis(), startMillis[pixel], endMillis[pixel], startColorMatrix[pixel][j], endColorMatrix[pixel][j]));
+      }
+    }
 }
 
 //take input from color wheel and set color values
@@ -120,39 +157,53 @@ void setBrightnessWheelInput(){
 }
 
 
-void shimmer(){
-  for(int k=0; k<strip.numPixels();k++){
-    if(millis()>endMillis[k]){
+void flicker(int pixel){
+    if(millis()>endMillis[pixel]){
       for(int j=0; j<4;j++){
-        startColorMatrix[k][j] = endColorMatrix[k][j];
-        endColorMatrix[k][j] = randomColorValue(colorValue[j],80,80);
+        startColorMatrix[pixel][j] = endColorMatrix[pixel][j];
+        endColorMatrix[pixel][j] = randomColorValue(colorValue[j],80,80);
       }
-      startMillis[k] = millis();
-      endMillis[k] = startMillis[k]+5000;
+      startMillis[pixel] = millis();
+      endMillis[pixel] = startMillis[pixel]+5000;
     }
+  
+}
 
-    for(int j=0; j<4;j++){
-      if(currentColorMatrix[j] != endColorMatrix[k][j]){
-        currentColorMatrix[j] = map(millis(), startMillis[k], endMillis[k], startColorMatrix[k][j], endColorMatrix[k][j]);
+void shimmer(int pixel){
+  
+    if(millis()>endMillis[pixel]){
+      for(int j=0; j<3;j++){
+        startColorMatrix[pixel][j] = endColorMatrix[pixel][j];
+        if(endColorMatrix[pixel][j] >= colorValue[j]){
+          endColorMatrix[pixel][j] = colorValue[j]/2;
+        }else{
+          endColorMatrix[pixel][j] = colorValue[j]*1.2;
+        }
       }
+      startColorMatrix[pixel][3] = endColorMatrix[pixel][3];
+      if(endColorMatrix[pixel][3] >= colorValue[3]){
+          endColorMatrix[pixel][3] = colorValue[3]*2/3;
+        }else{
+          endColorMatrix[pixel][3] = colorValue[3]*1.6;
+        }
+      startMillis[pixel] = millis();
+      endMillis[pixel] = startMillis[pixel]+random(2000,8000);
     }
-    strip.setPixelColor(k, strip.Color(currentColorMatrix[0],currentColorMatrix[1],currentColorMatrix[2],currentColorMatrix[3]));
+}
+
+int colorValueLimit(int color){
+  if(color < 0){
+    color = 0;
+  }else if(color>255){
+    color = 255;
   }
-  
-        strip.setBrightness(200);
-        strip.show();
-  
+  return color;
 }
 
 
 int randomColorValue(int startValue, int decrease, int increase){
   int temp = startValue-decrease+random(decrease+increase);
-  if(temp < 0){
-    temp = 0;
-  }else if(temp>255){
-    temp = 255;
-  }
-  return temp;
+  return colorValueLimit(temp);
 }
 
 // Input a value 0 to 255 to get a color value.
