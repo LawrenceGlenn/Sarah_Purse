@@ -61,10 +61,10 @@ void setup() {
   pinMode(colorInputPin, INPUT);
   pinMode(tintInputPin, INPUT);
   pinMode(brightnessInputPin, INPUT);
- colorValue[0]=0;
- colorValue[1]=10;
- colorValue[2]=80;
- colorValue[3]=200;
+ colorValue[0]=125;
+ colorValue[1]=125;
+ colorValue[2]=125;
+ colorValue[3]=125;
 }
 
 void loop() {
@@ -83,10 +83,9 @@ void loop() {
     shimmer(k);
     setCurrentColorMatrix(k);
     strip.setPixelColor(k, strip.Color(neopix_gamma[currentColorMatrix[0]],neopix_gamma[currentColorMatrix[1]],neopix_gamma[currentColorMatrix[2]],neopix_gamma[currentColorMatrix[3]]));
-        strip.show();
-  Serial.println("current blue value");
-  Serial.println(currentColorMatrix[3]);
-  }
+    
+  } 
+  strip.show();
         strip.setBrightness(200);
         delay(wait);
 
@@ -96,9 +95,8 @@ void loop() {
 void setCurrentColorMatrix(int pixel){
   
     for(int j=0; j<4;j++){
-      if(currentColorMatrix[j] != endColorMatrix[pixel][j]){
         currentColorMatrix[j] = colorValueLimit(map(millis(), startMillis[pixel], endMillis[pixel], startColorMatrix[pixel][j], endColorMatrix[pixel][j]));
-      }
+      
     }
 }
 
@@ -175,16 +173,16 @@ void shimmer(int pixel){
       for(int j=0; j<3;j++){
         startColorMatrix[pixel][j] = endColorMatrix[pixel][j];
         if(endColorMatrix[pixel][j] >= colorValue[j]){
-          endColorMatrix[pixel][j] = colorValue[j]/2;
+          endColorMatrix[pixel][j] = colorValue[j]-50;
         }else{
-          endColorMatrix[pixel][j] = colorValue[j]*1.2;
+          endColorMatrix[pixel][j] = colorValue[j]+50;
         }
       }
       startColorMatrix[pixel][3] = endColorMatrix[pixel][3];
       if(endColorMatrix[pixel][3] >= colorValue[3]){
-          endColorMatrix[pixel][3] = colorValue[3]*2/3;
+          endColorMatrix[pixel][3] = colorValue[3]-30;
         }else{
-          endColorMatrix[pixel][3] = colorValue[3]*1.6;
+          endColorMatrix[pixel][3] = colorValue[3]+80;
         }
       startMillis[pixel] = millis();
       endMillis[pixel] = startMillis[pixel]+random(2000,8000);
