@@ -3,7 +3,9 @@
   #include <avr/power.h>
 #endif
 
-#define PIN 6
+#define BUTTON_PIN 2
+
+#define LED_STRIP_PIN 6
 
 #define NUM_LEDS 23
 
@@ -19,14 +21,19 @@
 
 #define wait 10
 
+#define totalPatterns 3
+
 int colorInputValue = 0;
 int tintInputValue = 0;
 int brightnessInputValue = 0;
 int brightnessValue = 0;
+int buttonState = 0;
+int lastButtonState = 0;
+int selectedPattern = 0;
 
 int colorValue[4];
 
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_LEDS, PIN, NEO_GRBW + NEO_KHZ800);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_LEDS, LED_STRIP_PIN, NEO_GRBW + NEO_KHZ800);
 
 int startColorMatrix[NUM_LEDS][4];
 int endColorMatrix[NUM_LEDS][4];
@@ -61,35 +68,50 @@ void setup() {
   pinMode(colorInputPin, INPUT);
   pinMode(tintInputPin, INPUT);
   pinMode(brightnessInputPin, INPUT);
- colorValue[0]=125;
- colorValue[1]=125;
- colorValue[2]=125;
- colorValue[3]=125;
+  pinMode(BUTTON_PIN, INPUT);
 }
 
 void loop() {
   // read the value from the input:
- // setColorWheelInput();
- // setTintWheelInput();
- // setBrightnessWheelInput();
-//  loop through the pixels and set thier values
- //     for(uint16_t i=0; i<strip.numPixels(); i++) {
- //         strip.setPixelColor(i, strip.Color(200,0,100,20));
- //       }
- // strip.setBrightness(200);
- //       strip.show();
-  
+  setColorWheelInput();
+  setTintWheelInput();
+  setBrightnessWheelInput();
+ 
+  checkButton();
   for(int k=0; k<strip.numPixels();k++){
-    shimmer(k);
-    setCurrentColorMatrix(k);
+    runPattern(k);
     strip.setPixelColor(k, strip.Color(neopix_gamma[currentColorMatrix[0]],neopix_gamma[currentColorMatrix[1]],neopix_gamma[currentColorMatrix[2]],neopix_gamma[currentColorMatrix[3]]));
-    
-  } 
+  }
   strip.show();
-        strip.setBrightness(200);
+        strip.setBrightness(brightnessValue);
         delay(wait);
 
 
+}
+
+void runPattern(int pixel){
+  switch (selectedPattern){
+    case 0:
+      solid(pixel);
+      break;
+    case 1:
+      bioGlow(pixel);
+      break;
+    case 2:
+      shimmer(pixel);
+      break;
+  }
+}
+
+void checkButton(){
+  buttonState = digitalRead(BUTTON_PIN);
+  if (buttonState != lastButtonState && buttonState == HIGH){
+      selectedPattern++;
+      if(selectedPattern >= totalPatterns){
+        selectedPattern = 0;
+      }
+  }
+  lastButtonState = buttonState;
 }
 
 void setCurrentColorMatrix(int pixel){
@@ -132,10 +154,10 @@ void setColorWheelInput(){
     colorValue[0] = x-1024;
     colorValue[1] = 0;
     colorValue[2] = 255;
-  }else if (x>=1280 && x<=1536){
+  }else {
     colorValue[0] = 255;
     colorValue[1] = 0;
-    colorValue[2] = 1536-x;
+    colorValue[2] = 1535-x;
   }
   
 }
@@ -177,6 +199,13 @@ void updateEndColor(int pixel,int j, int decrease, int increase){
   
 }
 
+void solid(int pixel){
+    for(int j=0; j<4;j++){
+        currentColorMatrix[j] = colorValue[j];
+        endColorMatrix[pixel][j] = colorValue[j];
+    }
+}
+
 void shimmer(int pixel){
   
     if(millis()>endMillis[pixel]){
@@ -185,8 +214,10 @@ void shimmer(int pixel){
       }
         updateEndColor(pixel,3,40,100);
       startMillis[pixel] = millis();
-      endMillis[pixel] = startMillis[pixel]+random(500,4000);
+      endMillis[pixel] = startMillis[pixel]+random(500,3000);
     }
+    
+    setCurrentColorMatrix(pixel);
 }
 
 void bioGlow(int pixel){
@@ -197,8 +228,10 @@ void bioGlow(int pixel){
       }
         updateEndColor(pixel,3,30,80);
       startMillis[pixel] = millis();
-      endMillis[pixel] = startMillis[pixel]+random(2000,8000);
+      endMillis[pixel] = startMillis[pixel]+random(1500,6000);
     }
+    
+    setCurrentColorMatrix(pixel);
 }
 
 int colorValueLimit(int color){
@@ -215,6 +248,30 @@ int randomColorValue(int startValue, int decrease, int increase){
   int temp = startValue-decrease+random(decrease+increase);
   return colorValueLimit(temp);
 }
+
+// Slightly different, this makes the rainbow equally distributed throughout
+void rainbowCycle() {
+  uint16_t i, j;
+
+  for(j=0; j<256 * 5; j++) { // 5 cycles of all colors on wheel
+    for(i=0; i< strip.numPixels(); i++) {
+      strip.setPixelColor(i, Wheel(((i * 256 / strip.numPixels()) + j) & 255));
+    }
+    strip.show();
+  }
+}
+
+void rainbow() {
+  uint16_t i, j;
+
+  for(j=0; j<256; j++) {
+    for(i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, Wheel((i+j) & 255));
+    }
+    strip.show();
+  }
+}
+
 
 // Input a value 0 to 255 to get a color value.
 // The colours are a transition r - g - b - back to r.
